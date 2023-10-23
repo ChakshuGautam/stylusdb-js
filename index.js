@@ -1,6 +1,7 @@
 const debug = require('diagnostics')('raft');
 const argv = require('argh').argv;
 var LifeRaft = require('liferaft')
+const Log = require('liferaft/log');
 
 let msg;
 
@@ -26,6 +27,7 @@ class MsgRaft extends LifeRaft {
 
         socket.bind(this.address);
         socket.on('message', (data, fn) => {
+            console.log('data received', data);
             this.emit('data', data, fn);
         });
 
@@ -65,8 +67,7 @@ class MsgRaft extends LifeRaft {
 //
 const ports = [
     8081, 8082,
-    8083, 8084,
-    8085, 8086
+    8083, 8084
 ];
 
 //
@@ -78,10 +79,16 @@ var port = +argv.port || ports[0];
 // Now that we have all our variables we can safely start up our server with our
 // assigned port number.
 //
-const raft = new MsgRaft('tcp://127.0.0.1:' + port, {
+const raft = new MsgRaft('tcp://0.0.0.0:' + port, {
     'election min': 2000,
     'election max': 5000,
-    'heartbeat': 1000
+    'heartbeat': 1000,
+    adapter: require('leveldown'),
+    path: `./log/${port}/`,
+    'Log': new Log(this, {
+        adapter: require('leveldown'),
+        path: `./log/${port}/`
+    }),
 });
 
 raft.on('heartbeat timeout', function () {
@@ -109,7 +116,7 @@ raft.on('candidate', function () {
 });
 
 raft.on('data', function (data) {
-    console.log(data);
+    console.log("From Raft 'on' data method", data);
 })
 
 //
@@ -118,5 +125,12 @@ raft.on('data', function (data) {
 ports.forEach((nr) => {
     if (!nr || port === nr) return;
 
-    raft.join('tcp://127.0.0.1:' + nr);
+    raft.join('tcp://0.0.0.0:' + nr);
 });
+
+// send a message to the raft every 5 seconds
+setInterval(() => {
+    raft.message(MsgRaft.LEADER, { foo: 'bar' }, () => {
+        console.log('message sent');
+    });
+}, 5000);

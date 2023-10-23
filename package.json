@@ -20,8 +20,11 @@
     "argh": "0.1.x",
     "axon": "2.0.x",
     "diagnostics": "1.1.x",
+    "leveldown": "^6.1.1",
+    "levelup": "^5.1.1",
     "liferaft": "^1.0.0",
     "nanomsg": "4.0.x",
-    "node-lmdb": "^0.10.0"
+    "node-lmdb": "^0.10.0",
+    "promise-queue": "^2.2.5"
   }
 }
