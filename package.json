@@ -1,0 +1,26 @@
+{
+  "name": "stylusdb",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ChakshuGautam/stylusdb-js.git"
+  },
+  "author": "ChakshuGautam",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ChakshuGautam/stylusdb-js/issues"
+  },
+  "homepage": "https://github.com/ChakshuGautam/stylusdb-js#readme",
+  "dependencies": {
+    "argh": "0.1.x",
+    "axon": "2.0.x",
+    "diagnostics": "1.1.x",
+    "liferaft": "^1.0.0",
+    "nanomsg": "4.0.x"
+  }
+}
