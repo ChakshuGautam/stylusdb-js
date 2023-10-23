@@ -1,6 +1,5 @@
-const debug = require('diagnostics')('raft')
-    , argv = require('argh').argv;
-
+const debug = require('diagnostics')('raft');
+const argv = require('argh').argv;
 var LifeRaft = require('liferaft')
 
 let msg;
@@ -108,6 +107,10 @@ raft.on('candidate', function () {
     console.log('I am starting as candidate');
     console.log('----------------------------------');
 });
+
+raft.on('data', function (data) {
+    console.log(data);
+})
 
 //
 // Join in other nodes so they start searching for each other.

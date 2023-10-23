@@ -21,6 +21,7 @@
     "axon": "2.0.x",
     "diagnostics": "1.1.x",
     "liferaft": "^1.0.0",
-    "nanomsg": "4.0.x"
+    "nanomsg": "4.0.x",
+    "node-lmdb": "^0.10.0"
   }
 }
