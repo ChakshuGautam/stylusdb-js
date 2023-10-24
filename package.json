@@ -22,9 +22,16 @@
     "diagnostics": "1.1.x",
     "leveldown": "^6.1.1",
     "levelup": "^5.1.1",
-    "liferaft": "^1.0.0",
-    "nanomsg": "4.0.x",
     "node-lmdb": "^0.10.0",
-    "promise-queue": "^2.2.5"
+    "promise-queue": "^2.2.5",
+    "emits": "^3.0.0",
+    "encoding-down": "^6.3.0",
+    "eventemitter3": "^4.0.7",
+    "extendible": "^0.1.1",
+    "immediate": "^3.3.0",
+    "millisecond": "^0.1.2",
+    "modification": "^1.0.0",
+    "one-time": "^1.0.0",
+    "tick-tock": "^1.0.0"
   }
 }

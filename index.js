@@ -1,7 +1,7 @@
 const debug = require('diagnostics')('raft');
 const argv = require('argh').argv;
-var LifeRaft = require('liferaft')
-const Log = require('liferaft/log');
+var LifeRaft = require('./raft/index');
+const Log = require('./raft/log');
 
 let msg;
 
