@@ -3,6 +3,9 @@ const argv = require('argh').argv;
 var LifeRaft = require('./raft/index');
 const Log = require('./raft/log');
 
+const DBManager = require('./db');
+const LMDBManager = require('./db');
+
 let msg;
 
 if (argv.queue) msg = require(argv.queue);
@@ -25,9 +28,14 @@ class MsgRaft extends LifeRaft {
 
         const socket = this.socket = msg.socket('rep');
 
+        const path = `./db/${this.address.split('tcp://0.0.0.0:')[1]}`;
+        this.db = new LMDBManager(path, 2 * 1024 * 1024 * 1024, 10);
+        this.db.openDb(`${this.address}`);
+
         socket.bind(this.address);
         socket.on('message', (data, fn) => {
-            console.log('data received', data);
+            console.log('data received', JSON.stringify(data));
+            this.db.set(data.key, data.value);
             this.emit('data', data, fn);
         });
 
@@ -66,8 +74,9 @@ class MsgRaft extends LifeRaft {
 // assigned. This allows the failure of one single server.
 //
 const ports = [
-    8081, 8082,
-    8083, 8084
+    8081,
+    8082,
+    // 8083, 8084
 ];
 
 //
@@ -116,7 +125,8 @@ raft.on('candidate', function () {
 });
 
 raft.on('data', function (data) {
-    console.log("From Raft 'on' data method", data);
+
+    // console.log("From Raft 'on' data method", data);
 })
 
 //
@@ -126,11 +136,66 @@ ports.forEach((nr) => {
     if (!nr || port === nr) return;
 
     raft.join('tcp://0.0.0.0:' + nr);
+
+
 });
+
+var axon = require('axon');
+var sockPush = axon.socket('req');
+var sockPull = axon.socket('rep');
+sockPush.bind(port + 100);
+sockPull.connect(port + 100);
+
+sockPull.on('message', (task, data, reply) => {
+
+    if (raft.state === MsgRaft.LEADER) {
+
+        switch (task) {
+            case 'SET':
+                // TODO: Test for async
+                // console.log("Nodes", raft.nodes);
+                raft.message(MsgRaft.CHILD, data, () => {
+                    console.log('message sent');
+                });
+                break;
+            default:
+                reply('error');
+        }
+    } else {
+        switch (task) {
+            case 'GET':
+                // TODO: Test for async
+                // Implement round robin here based on current state of Raft
+                // console.log("Current state: ", raft.state, MsgRaft.LEADER, MsgRaft.CHILD, MsgRaft.CANDIDATE, raft.db.get(data.key));
+                reply(raft.db.get(data.key));
+                // if (raft.state !== MsgRaft.LEADER) {
+                //     reply(raft.db.get(data.key));
+                // }
+                break;
+            default:
+                reply('error');
+                break;
+        }
+    }
+})
 
 // send a message to the raft every 5 seconds
 setInterval(() => {
-    raft.message(MsgRaft.LEADER, { foo: 'bar' }, () => {
-        console.log('message sent');
-    });
+
+    for (var i = 0; i < 1_00_000; i++) {
+        sockPush.send('SET', {
+            'key': i.toString(), 'value': i.toString()
+        }, function () {
+            console.log(`ack for SET: ${i}`);
+        });
+    }
+
+    for (var i = 0; i < 1_00_000; i++) {
+        sockPush.send('GET', { 'key': i.toString() }, function (res) {
+            console.log(`Response for GET: ${res}`);
+        });
+    }
+    // raft.message(MsgRaft.LEADER, { foo: 'bar' }, () => {
+    //     console.log('message sent');
+    // });
 }, 5000);

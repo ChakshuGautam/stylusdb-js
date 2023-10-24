@@ -28,19 +28,31 @@ class LMDBManager {
     }
 
     set(key, value) {
-        if (!this.writeTxn) {
-            const txn = this.env.beginTxn();
-            this.writeTxn = txn;
+        try {
+            if (!this.writeTxn) {
+                const txn = this.env.beginTxn();
+                this.writeTxn = txn;
+            }
+            this.writeTxn.putString(this.dbi, key, value);
+            console.log('wrote', key, value);
+        } catch (e) {
+            console.error("Not a valid key", key, value);
         }
-        this.writeTxn.putString(this.dbi, key, value);
+
     }
 
     get(key) {
         // const txn = this.env.beginTxn({ readOnly: true });
+        if (!this.writeTxn) {
+            const txn = this.env.beginTxn();
+            this.writeTxn = txn;
+        }
         const value = this.writeTxn.getString(this.dbi, key);
         return value;
     }
 }
+
+module.exports = LMDBManager;
 
 // Usage:
 /*
