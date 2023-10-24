@@ -45,4 +45,7 @@ Coming soon
 ### References
 1. [REPL](https://gist.github.com/goliatone/e8f38b75aa05b2d189f68a92c61af110)
 2. [Axon - Message Queue](https://github.com/tj/axon)
-3. [RAFT Implementation](https://github.com/unshiftio/liferaft)
+3. [RAFT Implementation](https://github.com/unshiftio/liferaft), copied in the project to simplify making changes and packaging.
+4. [RAFT Protocol PDF](https://raft.github.io/raft.pdf)
+5. [RAFT Simplified 1](https://towardsdatascience.com/raft-algorithm-explained-a7c856529f40)
+6. [RAFT Simplified 2](https://towardsdatascience.com/raft-algorithm-explained-2-30db4790cdef)
