@@ -16,10 +16,10 @@ npm install
 Open four terminals and start a 4 node cluster.
 
 ```sh
-DEBUG=* node stylus.js --port 8081
-DEBUG=* node stylus.js --port 8082
-DEBUG=* node stylus.js --port 8083
-DEBUG=* node stylus.js --port 8084
+DEBUG=* node index.js --port 8081
+DEBUG=* node index.js --port 8082
+DEBUG=* node index.js --port 8083
+DEBUG=* node index.js --port 8084
 ```
 
 ### Benchmarks

@@ -927,6 +927,7 @@ class Raft extends EventEmitter {
         // about to send an append so don't send a heart beat
         // raft.heartbeat(raft.beat);
         const entry = await raft.log.saveCommand(command, raft.term);
+        console.log("entry", entry);
         const appendPacket = await raft.appendPacket(entry);
         raft.message(Raft.FOLLOWER, appendPacket);
     }
