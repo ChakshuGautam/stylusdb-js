@@ -12,6 +12,14 @@ nvm use 16
 npm install
 ```
 
+### Preparing Directories
+
+Create the following 5 directories before contiuing to start the server below:
+```bash
+mkdir -p db/8081 db/8082 db/8083 db/8084 log
+```
+
+
 ### Starting Server
 Open four terminals and start a 4 node cluster.
 
@@ -36,11 +44,7 @@ Coming soon
 
 ### Caveats
 1. WIP (Bleeding edge) - use it at your own risk.
-2. Built for learning puposed only
-
-### Contribution
-1. Project is actively looking for contributors. Look at open tickets
-
+2. Built for learning puposes only
 
 ### References
 1. [REPL](https://gist.github.com/goliatone/e8f38b75aa05b2d189f68a92c61af110)
