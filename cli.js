@@ -11,9 +11,9 @@
 const fs = require('fs');
 const path = require('path');
 const repl = require('repl');
+const name = 'stylusdb-cli';
 const debug = require('debug')(name);
 
-const name = 'stylusdb-cli';
 
 // Custom command setup
 const fullCommands = {
@@ -68,13 +68,14 @@ function init() {
 const customEval = function customEval(cmd, callback) {
     let result;
     cmd = cmd.trim();
-
+    let words = cmd.split(" ");
+    let command = words[0];
     // Calling eval with an empty line below in the default case will cause it to be saved in command history.
     if (cmd === '') {
         return undefined;
     }
 
-    switch (cmd) {
+    switch (command) {
         case 'clear':
             process.stdout.cursorTo(0, 0); // Move to top line of terminal
             process.stdout.clearLine();
