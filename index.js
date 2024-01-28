@@ -30,6 +30,7 @@ class MsgRaft extends LifeRaft {
 
         const path = `./db/${this.address.split('tcp://0.0.0.0:')[1]}`;
         this.db = new LMDBManager(path, 2 * 1024 * 1024 * 1024, 10);
+        // TODO: Add logic to create the directory in case it does not exist to avoid failures
         this.db.openDb(`${this.address}`);
 
         socket.bind(this.address);
@@ -76,6 +77,9 @@ class MsgRaft extends LifeRaft {
 const ports = [
     8081,
     8082,
+    8083,
+    8084,
+    8085,
 ];
 
 //
@@ -100,7 +104,7 @@ const raft = new MsgRaft('tcp://0.0.0.0:' + port, {
 });
 
 raft.on('heartbeat timeout', function () {
-    debug('heart beat timeout, starting election');
+    debug('======heart beat timeout, starting election====');
 });
 
 raft.on('term change', function (to, from) {

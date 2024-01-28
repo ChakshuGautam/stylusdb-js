@@ -1,5 +1,5 @@
 const lmdb = require('node-lmdb');
-
+// TODO: Turn this into an interface to different storage engine
 class LMDBManager {
     constructor(path, mapSize, maxDbs) {
         this.env = new lmdb.Env();
