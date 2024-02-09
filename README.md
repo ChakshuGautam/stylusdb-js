@@ -1,9 +1,9 @@
 # stylusdb-js
 
-A minimalistic implementation of a distributed KV Store
+A minimalistic implementation of a distributed KV Store based on the Raft consensus protocol. StylusDB aims to be a SOTA JS implementation of a RAFT based highthrouput KV.
 
 ### Configuration
-Modify config.json
+Modify `config.json`
 
 ### Installation
 ```sh
@@ -14,7 +14,7 @@ npm install
 
 ### Preparing Directories
 
-Create the following 5 directories before contiuing to start the server below:
+Create the following 6 directories before contiuing to start the server below:
 ```bash
 mkdir -p db/8081 db/8082 db/8083 db/8084 log
 ```
@@ -24,23 +24,26 @@ mkdir -p db/8081 db/8082 db/8083 db/8084 log
 Open four terminals and start a 4 node cluster.
 
 ```sh
-DEBUG=* node index.js --port 8081
-DEBUG=* node index.js --port 8082
-DEBUG=* node index.js --port 8083
-DEBUG=* node index.js --port 8084
+DEBUG=* node server.js --port 8081
+DEBUG=* node server.js --port 8082
+DEBUG=* node server.js --port 8083
+DEBUG=* node server.js --port 8084
 ```
 
 ### Benchmarks
-Coming soon
+Coming soon 
 
 ### REPL
-Coming soon
+Coming soon (WIP with [ClI](./cli.js))
 
 ### TODOs
 - [ ] Dockerization
 - [ ] Memory profiling
 - [ ] Scripts to deploy to edge
 - [ ] Client implementation
+- [ ] Integrate YCSB
+  - [ ] Java based
+  - [ ] Go based (because TiKV uses this to benchmark themselves)
 
 ### Caveats
 1. WIP (Bleeding edge) - use it at your own risk.
