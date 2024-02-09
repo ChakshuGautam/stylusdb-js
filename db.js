@@ -1,7 +1,15 @@
+/**
+ * @description This file serves as the interface for storage engine of the KV Store
+ */
+
 const lmdb = require('node-lmdb');
-// TODO: Turn this into an interface to different storage engine
+const fs = require('fs')
+// TODO: Turn this into an interface to different storage engine -- try RocksDB on the lines of TiKV
 class LMDBManager {
     constructor(path, mapSize, maxDbs) {
+        if(!fs.existsSync(path)) {
+            fs.mkdirSync(path, {recursive: true});
+        }
         this.env = new lmdb.Env();
         this.env.open({
             path: path || "./db",

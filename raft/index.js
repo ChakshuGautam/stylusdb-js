@@ -26,7 +26,7 @@ function UUID() {
 /**
  * Emit when modifications are made.
  *
- * @type {Fucntion}
+ * @type {Function}
  * @private
  */
 const change = require('modification')(' change');

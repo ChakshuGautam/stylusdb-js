@@ -3,7 +3,7 @@
  *   with custom commands, autocomplete for custom commands, persistent command history &
  *   "command history compression" (won't keep multiple instances in a row of the same command in the history)
  *
- * Author: l3l_aze <at> Yahoo!! (dot) com
+ * Author: yash <at> techsavvyash (dot) dev (yash@techsavvyash.dev)
  */
 
 'use strict';
@@ -28,7 +28,7 @@ const commands = Object.keys(fullCommands);
 
 // Create REPL
 const server = repl.start({
-    prompt: 'test-repl>',
+    prompt: 'stylus-db>',
     terminal: true, // Set to true to enable command history
     ignoreUndefined: true, // Ignore 'undefined' when running a command that does not return a value
     replMode: 'strict' // 'use strict'
