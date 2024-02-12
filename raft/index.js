@@ -349,6 +349,13 @@ class Raft extends EventEmitter {
 
                 //
                 // RPC command
+                case 'rpc':
+                    //TODO Check this make sure that it is called through the leader of 
+                    console.log("RAHUL in command case :", raft.leader === this.address)
+                    if(raft.leader === this.address){
+                        await this.command(packet.data);
+                    }
+                    break;
                 //
                 case 'exec':
                     break;

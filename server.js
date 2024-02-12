@@ -67,7 +67,8 @@ server.on("connection", (socket) => {
       switch (task) {
         case "SET":
           debug("Received a SET event on socket");
-          // forward to leader
+          // forward to leader 
+          //TODO: change the message and send the task as a packet 
           raftNode.message(MsgRaft.LEADER, task, () => {
             console.log(
               "Forwarded the set command to leader since I am a follower."

@@ -27,7 +27,7 @@ class LMDBManager {
     }
 
     closeDb() {
-        this.writeTxn.commit();
+        if(this.writeTxn) this.writeTxn.commit();
         this.dbi.close();
     }
 

@@ -30,6 +30,11 @@ DEBUG=* node server.js --port 8083
 DEBUG=* node server.js --port 8084
 ```
 
+for windows cmd
+```
+set DEBUG=* & node server.js --port 8081
+```
+
 ### Benchmarks
 Coming soon 
 
