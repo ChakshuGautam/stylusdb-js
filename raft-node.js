@@ -6,7 +6,7 @@
 
 const debug = require("diagnostics")("raft");
 
-const MsgRaft = require("./index");
+const MsgRaft = require("./msg-raft");
 const Log = require("./raft/log");
 let raft = undefined;
 
@@ -62,6 +62,9 @@ function onData(data) {
   // send this data to leader
   if (raft.state !== MsgRaft.LEADER) {
     try {
+      // send acknowledgement
+      const ackPacket = raft.packet("append ack", arr[0].command);
+      raft.message(MsgRaft.LEADER, ackPacket);
     } catch (err) {
       console.error("error while forwarding response to leader: ", err);
     }

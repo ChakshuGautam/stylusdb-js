@@ -1,6 +1,6 @@
-const Raft = require("./raft/index");
-const Log = require("./raft/log");
-const MsgRaft = require("./index");
+const Raft = require("../../raft/index");
+const Log = require("../../raft/log");
+const MsgRaft = require("../../index");
 
 const argv = require("argh").argv;
 

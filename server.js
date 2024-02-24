@@ -3,7 +3,7 @@ const argv = require("argh").argv;
 var axon = require("axon");
 
 const registerNode = require("./raft-node");
-const MsgRaft = require(".");
+const MsgRaft = require("./msg-raft");
 
 /// Globals
 var sockPull = axon.socket("rep");
@@ -42,6 +42,7 @@ server.on("connection", (socket) => {
   sockPull.connect(port + 100);
 
   sockPull.on("message", async (task, data, reply) => {
+    console.log("task: ", task);
     console.log(
       "Inside SET",
       raftNode.state === MsgRaft.LEADER ? "as leader" : "as a follower"
@@ -68,11 +69,15 @@ server.on("connection", (socket) => {
         case "SET":
           debug("Received a SET event on socket");
           // forward to leader
-          raftNode.message(MsgRaft.LEADER, task, () => {
-            console.log(
-              "Forwarded the set command to leader since I am a follower."
-            );
-          });
+          raftNode.message(
+            MsgRaft.LEADER,
+            MsgRaft.packet("append ack", JSON.stringify(task)),
+            () => {
+              console.log(
+                "Forwarded the set command to leader since I am a follower."
+              );
+            }
+          );
         case "GET":
           // TODO: Test for async
           debug("Received a GET event on socket");
@@ -83,6 +88,7 @@ server.on("connection", (socket) => {
           // }
           break;
         default:
+          console.log("in default and task: ", task);
           reply("error 90");
           break;
       }
@@ -111,4 +117,34 @@ server.listen(port + 1000, () => {
   });
 
   console.log(`Initialsied raft node and server on port ${port}`);
+
+  // send a message to the raft every 5 seconds
+  // setInterval(async () => {
+  //   if (raftNode.state === MsgRaft.LEADER) {
+  //     for (var i = 0; i < 5000; i++) {
+  //       const command = {
+  //         command: "SET",
+  //         data: {
+  //           key: i.toString(),
+  //           value: i.toString(),
+  //         },
+  //       };
+  //       await raftNode.command(command);
+  //     }
+  //     // sockPush.send('SET', {
+  //     //     'key': i.toString(), 'value': i.toString()
+  //     // }, function (res) {
+  //     //     console.log(`ack for SET: ${res}`);
+  //     // });
+  //   }
+
+  //   // for (var i = 0; i < 10; i++) {
+  //   //     sockPush.send('GET', { 'key': i.toString() }, function (res) {
+  //   //         console.log(`Response for GET: ${res}`);
+  //   //     });
+  //   // }
+  //   // raft.message(MsgRaft.LEADER, { foo: 'bar' }, () => {
+  //   //     console.log('message sent');
+  //   // });
+  // }, 5000);
 });
