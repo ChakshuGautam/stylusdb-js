@@ -18,3 +18,9 @@ To browse the DB: https://www.mdbopener.com/
 - [ ] Large Keys and Small Keys optimisation
 
 
+
+## Doubts :- 
+- [ ] In message of raft when we are sending "SET" as what it should be giving error as in raft.on("data", packet) the packet is bound to be an object which is not so in this case, (sending message in server is ambiguous, the what must be in the form of a raft packet)
+
+- [ ] When we send a message from follower to leader to set a value, there is no case to command all followers to save that message
+
