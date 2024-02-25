@@ -63,8 +63,10 @@ function onData(data) {
   if (raft.state !== MsgRaft.LEADER) {
     try {
       // send acknowledgement
-      const ackPacket = raft.packet("append ack", arr[0].command);
-      raft.message(MsgRaft.LEADER, ackPacket);
+      if (arr && arr.length > 0) {
+        const ackPacket = raft.packet("append ack", arr[0].command);
+        raft.message(MsgRaft.LEADER, ackPacket);
+      }
     } catch (err) {
       console.error("error while forwarding response to leader: ", err);
     }
