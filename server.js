@@ -101,7 +101,8 @@ server.on("connection", (socket) => {
   });
 });
 
-server.listen(port + 1000, () => {
+let raftNodeServerPort = port + 1000;
+server.listen(raftNodeServerPort, () => {
   // raftNode is initialised whenever the server starts to listen
   // initiaise the node
   raftNode = registerNode(port, {
@@ -116,35 +117,7 @@ server.listen(port + 1000, () => {
     raftNode.join("tcp://0.0.0.0:" + nr);
   });
 
-  console.log(`Initialsied raft node and server on port ${port}`);
-
-  // send a message to the raft every 5 seconds
-  // setInterval(async () => {
-  //   if (raftNode.state === MsgRaft.LEADER) {
-  //     for (var i = 0; i < 5000; i++) {
-  //       const command = {
-  //         command: "SET",
-  //         data: {
-  //           key: i.toString(),
-  //           value: i.toString(),
-  //         },
-  //       };
-  //       await raftNode.command(command);
-  //     }
-  //     // sockPush.send('SET', {
-  //     //     'key': i.toString(), 'value': i.toString()
-  //     // }, function (res) {
-  //     //     console.log(`ack for SET: ${res}`);
-  //     // });
-  //   }
-
-  //   // for (var i = 0; i < 10; i++) {
-  //   //     sockPush.send('GET', { 'key': i.toString() }, function (res) {
-  //   //         console.log(`Response for GET: ${res}`);
-  //   //     });
-  //   // }
-  //   // raft.message(MsgRaft.LEADER, { foo: 'bar' }, () => {
-  //   //     console.log('message sent');
-  //   // });
-  // }, 5000);
+  console.log(
+    `Initialsied raft node at socket ${port} and raft node server on port ${raftNodeServerPort}`
+  );
 });

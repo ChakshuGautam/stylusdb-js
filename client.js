@@ -7,7 +7,7 @@ var axon = require("axon");
 var sockPush = axon.socket("req");
 let port = +argv.port || 8081; // read the port from command line arguments
 
-sockPush.bind(port + 100);
+sockPush.connect(port + 1000);
 
 // send a message to the raft every 5 seconds
 setInterval(async () => {
