@@ -82,23 +82,39 @@ server.on("connection", (socket) => {
     } else {
       switch (task) {
         case "SET":
-          let packet = await raftNode.packet("append", data);
-          console.log("RAHUL received packet", packet, "as not leader in set");
+          let cmd = data[0].command;
+          cmd["type"] = "SET";
+          let packet = await raftNode.packet("rpc", cmd);
           // forward to leader
           raftNode.message(MsgRaft.LEADER, packet, () => {
             console.log(
               "Forwarded the set command to leader since I am a follower."
             );
           });
+          socket.write(
+            `${JSON.stringify(cmd)} - ack`
+          );
           break;
         case "GET":
-          // TODO: Test for async
-          console.log("Received a GET event on socket");
-          // Implement round robin here based on current state of Raft
-          reply(raftNode.db.get(data.key));
-          // if (raft.state !== MsgRaft.LEADER) {
-          //     reply(raft.db.get(data.key));
-          // }
+          try {
+            if (data && data.length > 0) {
+              let cmd = data[0].command;
+              cmd["type"] = "GET";
+              let packet = await raftNode.packet("rpc", cmd);
+              raftNode.message(MsgRaft.LEADER, packet, () => {
+                console.log(
+                  "Forwarded the set command to leader since I am a follower."
+                );
+              });
+              let val = raftNode.db.get(cmd.key)
+              socket.write(`Value of key : ${cmd.key} is ${val}`);
+            } else {
+              throw new Error("Invalid data format");
+            }
+          } catch (e) {
+            console.log(e);
+            socket.write("error 2");
+          }
           break;
         case "EXIT":
           raftNode.db.closeDb();
