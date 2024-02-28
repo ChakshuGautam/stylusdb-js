@@ -42,38 +42,39 @@ server.on("connection", (socket) => {
         case "SET":
           // TODO: Test for async
           try {
-            if (data && data.length > 0){
-              let cmd = data[0].command
+            if (data && data.length > 0) {
+              let cmd = data[0].command;
               await raftNode.command(cmd);
-              socket.write(`${JSON.stringify(cmd)} - ack, ${raftNode.log.length}`);
-            }else {
+              socket.write(
+                `${JSON.stringify(cmd)} - ack, ${raftNode.log.length}`
+              );
+            } else {
               throw new Error("Invalid data format");
             }
-            
           } catch (e) {
             console.log(e);
             socket.write("error 2");
           }
           break;
+        case "GET":
+          break;
+        case "EXIT":
+          raftNode.db.closeDb();
+          break;
         default:
           socket.write("error 46");
       }
     } else {
-
       switch (task) {
         case "SET":
           let packet = await raftNode.packet("append", data);
           console.log("RAHUL received packet", packet, "as not leader in set");
           // forward to leader
-          raftNode.message(
-            MsgRaft.LEADER,
-            packet,
-            () => {
-              console.log(
-                "Forwarded the set command to leader since I am a follower."
-              );
-            }
-          );
+          raftNode.message(MsgRaft.LEADER, packet, () => {
+            console.log(
+              "Forwarded the set command to leader since I am a follower."
+            );
+          });
           break;
         case "GET":
           // TODO: Test for async
@@ -84,13 +85,15 @@ server.on("connection", (socket) => {
           //     reply(raft.db.get(data.key));
           // }
           break;
+        case "EXIT":
+          raftNode.db.closeDb();
+          break;
         default:
           console.log("in default and task: ", task);
           reply("error 90");
           break;
       }
     }
-
   });
 
   // TODO: Figure out a way to connect sockPull to the socket received with server connection
