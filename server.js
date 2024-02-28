@@ -42,8 +42,14 @@ server.on("connection", (socket) => {
         case "SET":
           // TODO: Test for async
           try {
-            await raftNode.command(data);
-            socket.write(`${JSON.stringify(data)} - ack, ${raftNode.log.length}`);
+            if (data && data.length > 0){
+              let cmd = data[0].command
+              await raftNode.command(cmd);
+              socket.write(`${JSON.stringify(cmd)} - ack, ${raftNode.log.length}`);
+            }else {
+              throw new Error("Invalid data format");
+            }
+            
           } catch (e) {
             console.log(e);
             socket.write("error 2");
@@ -56,7 +62,8 @@ server.on("connection", (socket) => {
 
       switch (task) {
         case "SET":
-          let packet = await raftNode.packet("append ack", data);
+          let packet = await raftNode.packet("append", data);
+          console.log("RAHUL received packet", packet, "as not leader in set");
           // forward to leader
           raftNode.message(
             MsgRaft.LEADER,

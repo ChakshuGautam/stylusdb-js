@@ -16,11 +16,25 @@ var netSocket = net.createConnection({port: port + 1000}, ()=>{
 const data = {
   task: "SET",
   data: [{
-    command: "SET a = 26"
+    command: {
+      key : "a",
+      value: "26"
+    }
+  }]
+};
+const data2 = {
+  task: "SET",
+  data: [{
+    command: {
+      key : "b",
+      value: "27"
+    }
   }]
 };
 const st = JSON.stringify(data);
+const st2 = JSON.stringify(data2);
 netSocket.write(st);
+netSocket.write(st2);
 
 // send a message to the raft every 5 seconds
 // setInterval(async () => {
@@ -45,3 +59,24 @@ netSocket.write(st);
 //     });
 //   }
 // }, 5000);
+
+const g1 = {
+  task: "GET",
+  data: [{
+    command: {
+      key : "a"
+    }
+  }]
+};
+const g2 = {
+  task: "GET",
+  data: [{
+    command: {
+      key : "b"
+    }
+  }]
+};
+const gt1 = JSON.stringify(data);
+const gt2 = JSON.stringify(data2);
+netSocket.write(gt1);
+netSocket.write(gt2)
