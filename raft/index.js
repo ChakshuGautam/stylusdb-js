@@ -948,6 +948,7 @@ class Raft extends EventEmitter {
     async commitEntries(entries) {
         entries.forEach(async (entry) => {
             await this.log.commit(entry.index)
+            console.log("RAHUL entries commited in commit entries method", entry);
             this.emit('commit', entry.command);
         });
     }

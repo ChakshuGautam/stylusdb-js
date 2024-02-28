@@ -33,11 +33,69 @@ server.on("connection", (socket) => {
 
   socket.write("Connected\n");
 
-  socket.on("data", (data) => {
-    const { type, args } = data;
-    console.log(`Received request of type ${type} with arguments ${args}`);
-    raftNode.command(data);
+  socket.on("data", async (pkt) => {
+    pkt = JSON.parse(pkt);
+    const { task, data } = pkt;
+
+    if (raftNode.state === MsgRaft.LEADER) {
+      switch (task) {
+        case "SET":
+          // TODO: Test for async
+          try {
+            if (data && data.length > 0) {
+              let cmd = data[0].command;
+              await raftNode.command(cmd);
+              socket.write(
+                `${JSON.stringify(cmd)} - ack, ${raftNode.log.length}`
+              );
+            } else {
+              throw new Error("Invalid data format");
+            }
+          } catch (e) {
+            console.log(e);
+            socket.write("error 2");
+          }
+          break;
+        case "GET":
+          break;
+        case "EXIT":
+          raftNode.db.closeDb();
+          break;
+        default:
+          socket.write("error 46");
+      }
+    } else {
+      switch (task) {
+        case "SET":
+          let packet = await raftNode.packet("append", data);
+          console.log("RAHUL received packet", packet, "as not leader in set");
+          // forward to leader
+          raftNode.message(MsgRaft.LEADER, packet, () => {
+            console.log(
+              "Forwarded the set command to leader since I am a follower."
+            );
+          });
+          break;
+        case "GET":
+          // TODO: Test for async
+          console.log("Received a GET event on socket");
+          // Implement round robin here based on current state of Raft
+          reply(raftNode.db.get(data.key));
+          // if (raft.state !== MsgRaft.LEADER) {
+          //     reply(raft.db.get(data.key));
+          // }
+          break;
+        case "EXIT":
+          raftNode.db.closeDb();
+          break;
+        default:
+          console.log("in default and task: ", task);
+          reply("error 90");
+          break;
+      }
+    }
   });
+
   // TODO: Figure out a way to connect sockPull to the socket received with server connection
   sockPull.connect(port + 100);
 
@@ -54,7 +112,7 @@ server.on("connection", (socket) => {
           console.log("Nodes", raftNode.nodes);
           try {
             console.log("Inside SET");
-            await raft.command(data);
+            await raftNode.command(data);
             reply(`${JSON.stringify(data)} - ack, ${raftNode.log.length}`);
           } catch (e) {
             console.log(e);
@@ -67,20 +125,21 @@ server.on("connection", (socket) => {
     } else {
       switch (task) {
         case "SET":
-          debug("Received a SET event on socket");
+          console.log("Received a SET event on socket");
           // forward to leader
           raftNode.message(
             MsgRaft.LEADER,
-            MsgRaft.packet("append ack", JSON.stringify(task)),
+            raftNode.packet("append ack", JSON.stringify(task)),
             () => {
               console.log(
                 "Forwarded the set command to leader since I am a follower."
               );
             }
           );
+          break;
         case "GET":
           // TODO: Test for async
-          debug("Received a GET event on socket");
+          console.log("Received a GET event on socket");
           // Implement round robin here based on current state of Raft
           reply(raftNode.db.get(data.key));
           // if (raft.state !== MsgRaft.LEADER) {
@@ -101,7 +160,8 @@ server.on("connection", (socket) => {
   });
 });
 
-server.listen(port + 1000, () => {
+let raftNodeServerPort = port + 1000;
+server.listen(raftNodeServerPort, () => {
   // raftNode is initialised whenever the server starts to listen
   // initiaise the node
   raftNode = registerNode(port, {
@@ -116,35 +176,7 @@ server.listen(port + 1000, () => {
     raftNode.join("tcp://0.0.0.0:" + nr);
   });
 
-  console.log(`Initialsied raft node and server on port ${port}`);
-
-  // send a message to the raft every 5 seconds
-  // setInterval(async () => {
-  //   if (raftNode.state === MsgRaft.LEADER) {
-  //     for (var i = 0; i < 5000; i++) {
-  //       const command = {
-  //         command: "SET",
-  //         data: {
-  //           key: i.toString(),
-  //           value: i.toString(),
-  //         },
-  //       };
-  //       await raftNode.command(command);
-  //     }
-  //     // sockPush.send('SET', {
-  //     //     'key': i.toString(), 'value': i.toString()
-  //     // }, function (res) {
-  //     //     console.log(`ack for SET: ${res}`);
-  //     // });
-  //   }
-
-  //   // for (var i = 0; i < 10; i++) {
-  //   //     sockPush.send('GET', { 'key': i.toString() }, function (res) {
-  //   //         console.log(`Response for GET: ${res}`);
-  //   //     });
-  //   // }
-  //   // raft.message(MsgRaft.LEADER, { foo: 'bar' }, () => {
-  //   //     console.log('message sent');
-  //   // });
-  // }, 5000);
+  console.log(
+    `Initialsied raft node at socket ${port} and raft node server on port ${raftNodeServerPort}`
+  );
 });

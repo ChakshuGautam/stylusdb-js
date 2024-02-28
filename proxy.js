@@ -4,11 +4,6 @@
 
 const net = require("net");
 const { EventEmitter } = require("events");
-const {
-  executeSELECTQuery,
-  executeINSERTQuery,
-  executeDELETEQuery,
-} = require("./queryExecuter");
 
 class QueryQueue extends EventEmitter {
   constructor() {
@@ -38,15 +33,7 @@ class QueryQueue extends EventEmitter {
   }
 
   async execute(query) {
-    if (query.toLowerCase().startsWith("select")) {
-      return await executeSELECTQuery(query);
-    } else if (query.toLowerCase().startsWith("insert into")) {
-      return await executeINSERTQuery(query);
-    } else if (query.toLowerCase().startsWith("delete from")) {
-      return await executeDELETEQuery(query);
-    } else {
-      throw new Error("Unsupported command");
-    }
+    // TODO: Replace with KV GET SET Logic
   }
 }
 
@@ -83,6 +70,6 @@ server.on("connection", (socket) => {
   });
 });
 
-server.listen(5432, () => {
-  console.log("Server listening on port 5432");
+server.listen(6767, () => {
+  console.log("Server listening on port 6767");
 });

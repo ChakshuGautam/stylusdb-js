@@ -47,7 +47,7 @@ function candidate() {
   console.log("----------------------------------");
 }
 
-function onData(data) {
+async function onData(data) {
   // TODO: Edit this to make perfect
   console.log(
     "From Raft 'on' data method",
@@ -64,7 +64,7 @@ function onData(data) {
     try {
       // send acknowledgement
       if (arr && arr.length > 0) {
-        const ackPacket = raft.packet("append ack", arr[0].command);
+        const ackPacket = await raft.packet("append ack", arr[0].command);
         raft.message(MsgRaft.LEADER, ackPacket);
       }
     } catch (err) {
