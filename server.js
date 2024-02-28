@@ -44,6 +44,7 @@ server.on("connection", (socket) => {
           try {
             if (data && data.length > 0) {
               let cmd = data[0].command;
+              cmd["type"] = "SET";
               await raftNode.command(cmd);
               socket.write(
                 `${JSON.stringify(cmd)} - ack, ${raftNode.log.length}`
@@ -57,6 +58,21 @@ server.on("connection", (socket) => {
           }
           break;
         case "GET":
+          try {
+            if (data && data.length > 0) {
+              let cmd = data[0].command;
+              cmd["type"] = "GET";
+              await raftNode.command(cmd);
+              socket.write(
+                `${JSON.stringify(cmd)} - ack, ${raftNode.log.length}`
+              );
+            } else {
+              throw new Error("Invalid data format");
+            }
+          } catch (e) {
+            console.log(e);
+            socket.write("error 2");
+          }
           break;
         case "EXIT":
           raftNode.db.closeDb();
