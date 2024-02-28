@@ -25,7 +25,7 @@ var netSocket = net.createConnection({ port: port + 1000 }, () => {
 //     },
 //   ],
 // };
-function sequentialCalls(times){
+function sequentialSETCalls(times){
     let i = 1;
   
     function makeCall() {
@@ -50,6 +50,10 @@ function sequentialCalls(times){
       if (i <= times) {
         // Set a timeout for 1 second before making the next call
         setTimeout(makeCall, 1000);
+      }else{
+        setTimeout(()=>{
+          sequentialGETCalls(5);
+        }, 1000);
       }
     }
   
@@ -57,7 +61,44 @@ function sequentialCalls(times){
     makeCall();
 }
 
-sequentialCalls(5);
+function sequentialGETCalls(times){
+  let i = 1;
+
+  function makeCall() {
+    // Your function or code that needs to be called sequentially
+    let data = {
+      task: "GET",
+      data: [
+        {
+          command: {
+            key: "a" + i
+          },
+        },
+      ],
+    };
+    let st = JSON.stringify(data)
+    netSocket.write(st);
+
+    i++;
+
+    // Check if there are more calls to make
+    if (i <= times) {
+      // Set a timeout for 1 second before making the next call
+      setTimeout(makeCall, 1000);
+    }
+  }
+
+  // Start the first call
+  makeCall();
+}
+
+sequentialSETCalls(5);
+
+
+netSocket.on("data", (buffer)=>{
+  const data = buffer.toString('utf8');
+  console.log(data);
+})
 
 // send a message to the raft every 5 seconds
 // setInterval(async () => {
