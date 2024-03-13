@@ -34,6 +34,9 @@ server.on("connection", (socket) => {
   socket.write("Connected\n");
 
   socket.on("data", async (pkt) => {
+    if (pkt === undefined) {
+      socket.write("undefined packet received");
+    }
     console.log("***************************************");
     console.log("***************************************");
     console.log("RECEIVED PACKET IS: ");
@@ -58,7 +61,7 @@ server.on("connection", (socket) => {
     console.log("#########################################");
     pkt.forEach(async (item) => {
       console.log("item in for each: ", item);
-      const { task, data } = item;
+      const { task, data } = JSON.parse(item);
       if (raftNode.state === MsgRaft.LEADER) {
         switch (task) {
           case "SET":
@@ -138,8 +141,11 @@ server.on("connection", (socket) => {
             raftNode.db.closeDb();
             break;
           default:
+            if (task === undefined) {
+              console.warn("one of the packets was with undefined task");
+              socket.write("one of the packets was with undefined task");
+            }
             console.log("in default and task: ", task);
-            reply("error 90");
             break;
         }
       }

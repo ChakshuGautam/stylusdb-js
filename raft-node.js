@@ -90,17 +90,21 @@ function onCommit(command) {
 // TODO: Turn this into a Promise returning thing
 const registerNode = function (port, config = {}) {
   // return new Promise((resolve, reject) => {
-  raft = new MsgRaft("tcp://0.0.0.0:" + port, {
-    "election min": config.min,
-    "election max": config.max,
-    heartbeat: config.heartbeat,
-    adapter: require("leveldown"),
-    path: `./log/${port}/`,
-    Log: new Log(this, {
+  try {
+    raft = new MsgRaft("tcp://0.0.0.0:" + port, {
+      "election min": config.min,
+      "election max": config.max,
+      heartbeat: config.heartbeat,
       adapter: require("leveldown"),
       path: `./log/${port}/`,
-    }),
-  });
+      Log: new Log(this, {
+        adapter: require("leveldown"),
+        path: `./log/${port}/`,
+      }),
+    });
+  } catch (err) {
+    console.log("error creating msgraft node: ", err);
+  }
 
   // registering callbacks on the instance
   raft
