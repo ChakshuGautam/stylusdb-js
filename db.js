@@ -2,62 +2,66 @@
  * @description This file serves as the interface for storage engine of the KV Store
  */
 
-const lmdb = require('node-lmdb');
-const fs = require('fs')
+const lmdb = require("node-lmdb");
+const fs = require("fs");
 // TODO: Turn this into an interface to different storage engine -- try RocksDB on the lines of TiKV
 class LMDBManager {
-    constructor(path, mapSize, maxDbs) {
-        if(!fs.existsSync(path)) {
-            fs.mkdirSync(path, {recursive: true});
-        }
-        this.env = new lmdb.Env();
-        this.env.open({
-            path: path || "./db",
-            mapSize: mapSize || 2 * 1024 * 1024 * 1024,  // 2 GB by default
-            maxDbs: maxDbs || 10
-        });
-        this.writeTxn = null;
+  constructor(path, mapSize, maxDbs) {
+    if (!fs.existsSync(path)) {
+      fs.mkdirSync(path, { recursive: true });
     }
+    this.env = new lmdb.Env();
+    this.env.open({
+      path: path || "./db",
+      mapSize: mapSize || 2 * 1024 * 1024 * 1024, // 2 GB by default
+      maxDbs: maxDbs || 10,
+    });
+    this.writeTxn = null;
+  }
 
-    openDb(dbName) {
-        this.dbi = this.env.openDbi({
-            name: dbName || "mydb",
-            create: true
-        });
+  openDb(dbName) {
+    this.dbi = this.env.openDbi({
+      name: dbName || "mydb",
+      create: true,
+    });
+  }
+
+  closeDb() {
+    if (this.writeTxn) this.writeTxn.commit();
+    this.dbi.close();
+  }
+
+  closeEnv() {
+    this.env.close();
+  }
+
+  set(key, value) {
+    try {
+      if (!this.writeTxn) {
+        const txn = this.env.beginTxn();
+        this.writeTxn = txn;
+      }
+      this.writeTxn.putString(this.dbi, key, value);
+      console.log("wrote", key, value);
+    } catch (e) {
+      console.error("Not a valid key", key, value);
     }
+  }
 
-    closeDb() {
-        if(this.writeTxn) this.writeTxn.commit();
-        this.dbi.close();
+  get(key) {
+    // const txn = this.env.beginTxn({ readOnly: true });
+    try {
+      if (!this.writeTxn) {
+        const txn = this.env.beginTxn();
+        this.writeTxn = txn;
+      }
+      const value = this.writeTxn.getString(this.dbi, key);
+      return value;
+    } catch (err) {
+      console.error(err);
+      return "error finding key";
     }
-
-    closeEnv() {
-        this.env.close();
-    }
-
-    set(key, value) {
-        try {
-            if (!this.writeTxn) {
-                const txn = this.env.beginTxn();
-                this.writeTxn = txn;
-            }
-            this.writeTxn.putString(this.dbi, key, value);
-            console.log('wrote', key, value);
-        } catch (e) {
-            console.error("Not a valid key", key, value);
-        }
-
-    }
-
-    get(key) {
-        // const txn = this.env.beginTxn({ readOnly: true });
-        if (!this.writeTxn) {
-            const txn = this.env.beginTxn();
-            this.writeTxn = txn;
-        }
-        const value = this.writeTxn.getString(this.dbi, key);
-        return value;
-    }
+  }
 }
 
 module.exports = LMDBManager;

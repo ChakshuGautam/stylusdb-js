@@ -34,66 +34,116 @@ server.on("connection", (socket) => {
   socket.write("Connected\n");
 
   socket.on("data", async (pkt) => {
-    pkt = JSON.parse(pkt);
-    const { task, data } = pkt;
-
-    if (raftNode.state === MsgRaft.LEADER) {
-      switch (task) {
-        case "SET":
-          // TODO: Test for async
-          try {
-            if (data && data.length > 0) {
-              let cmd = data[0].command;
-              await raftNode.command(cmd);
-              socket.write(
-                `${JSON.stringify(cmd)} - ack, ${raftNode.log.length}`
-              );
-            } else {
-              throw new Error("Invalid data format");
+    console.log("***************************************");
+    console.log("***************************************");
+    console.log("RECEIVED PACKET IS: ");
+    console.log(pkt.toString());
+    console.log("***************************************");
+    console.log("***************************************");
+    pkt = pkt
+      .toString()
+      .split("\n")
+      .map((str) => str.trim())
+      .filter((str) => {
+        return str.trim() !== "";
+      })
+      .map((item) => {
+        return JSON.parse(item.trim());
+      });
+    console.log("#########################################");
+    console.log("#########################################");
+    console.log("RECEIVED PACKET AFTER SPLITTING IS: ");
+    console.log(pkt);
+    console.log("#########################################");
+    console.log("#########################################");
+    pkt.forEach(async (item) => {
+      console.log("item in for each: ", item);
+      const { task, data } = item;
+      if (raftNode.state === MsgRaft.LEADER) {
+        switch (task) {
+          case "SET":
+            // TODO: Test for async
+            try {
+              if (data && data.length > 0) {
+                let cmd = data[0].command;
+                cmd["type"] = "SET";
+                await raftNode.command(cmd);
+                socket.write(`${JSON.stringify(cmd)} - ack`);
+              } else {
+                throw new Error("Invalid data format");
+              }
+            } catch (e) {
+              console.log(e);
+              socket.write("error 2");
             }
-          } catch (e) {
-            console.log(e);
-            socket.write("error 2");
-          }
-          break;
-        case "GET":
-          break;
-        case "EXIT":
-          raftNode.db.closeDb();
-          break;
-        default:
-          socket.write("error 46");
+            break;
+          case "GET":
+            try {
+              if (data && data.length > 0) {
+                let cmd = data[0].command;
+                cmd["type"] = "GET";
+                await raftNode.command(cmd);
+                let val = raftNode.db.get(cmd.key);
+                socket.write(`Value of key : ${cmd.key} is ${val}`);
+              } else {
+                throw new Error("Invalid data format");
+              }
+            } catch (e) {
+              console.log(e);
+              socket.write("error 2");
+            }
+            break;
+          case "EXIT":
+            raftNode.db.closeDb();
+            break;
+          default:
+            socket.write("error 46");
+        }
+      } else {
+        switch (task) {
+          case "SET":
+            let cmd = data[0].command;
+            cmd["type"] = "SET";
+            let packet = await raftNode.packet("rpc", cmd);
+            // forward to leader
+            raftNode.message(MsgRaft.LEADER, packet, () => {
+              console.log(
+                "Forwarded the set command to leader since I am a follower."
+              );
+            });
+            socket.write(`${JSON.stringify(cmd)} - ack`);
+            break;
+          case "GET":
+            try {
+              if (data && data.length > 0) {
+                let cmd = data[0].command;
+                cmd["type"] = "GET";
+                let packet = await raftNode.packet("rpc", cmd);
+                raftNode.message(MsgRaft.LEADER, packet, () => {
+                  console.log(
+                    "Forwarded the set command to leader since I am a follower."
+                  );
+                });
+                let val = raftNode.db.get(cmd.key);
+                socket.write(`Value of key : ${cmd.key} is ${val}`);
+              } else {
+                throw new Error("Invalid data format");
+              }
+            } catch (e) {
+              console.log(e);
+              socket.write("error 2");
+            }
+            break;
+          case "EXIT":
+            raftNode.db.closeDb();
+            break;
+          default:
+            console.log("in default and task: ", task);
+            reply("error 90");
+            break;
+        }
       }
-    } else {
-      switch (task) {
-        case "SET":
-          let packet = await raftNode.packet("append", data);
-          console.log("RAHUL received packet", packet, "as not leader in set");
-          // forward to leader
-          raftNode.message(MsgRaft.LEADER, packet, () => {
-            console.log(
-              "Forwarded the set command to leader since I am a follower."
-            );
-          });
-          break;
-        case "GET":
-          // TODO: Test for async
-          console.log("Received a GET event on socket");
-          // Implement round robin here based on current state of Raft
-          reply(raftNode.db.get(data.key));
-          // if (raft.state !== MsgRaft.LEADER) {
-          //     reply(raft.db.get(data.key));
-          // }
-          break;
-        case "EXIT":
-          raftNode.db.closeDb();
-          break;
-        default:
-          console.log("in default and task: ", task);
-          reply("error 90");
-          break;
-      }
-    }
+    });
   });
 
   // TODO: Figure out a way to connect sockPull to the socket received with server connection

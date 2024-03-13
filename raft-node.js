@@ -76,8 +76,14 @@ async function onData(data) {
 function onCommit(command) {
   // TODO: Edit this to make perfect
   console.log("Inside commit", command);
-  raft.db.set(command.key, command.value);
-  console.log("Committed", command.key, command.value);
+  let val;
+  if (command.type === "SET") {
+    raft.db.set(command.key, command.value);
+    console.log("Committed", command.key, command.value);
+  } else if (command.type === "GET") {
+    val = raft.db.get(command.key);
+    console.log("got val in GET: ", val);
+  }
 }
 
 // main function to create and return the instance
