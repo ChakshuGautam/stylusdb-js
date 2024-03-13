@@ -43,6 +43,7 @@ server.on("connection", (socket) => {
     pkt = pkt
       .toString()
       .split("\n")
+      .map((str) => str.trim())
       .filter((str) => {
         return str.trim() !== "";
       })

@@ -23,7 +23,7 @@ let get = {
   data: [
     {
       command: {
-        key: "key_2",
+        key: "key_1",
       },
     },
   ],
@@ -33,15 +33,19 @@ let get = {
  * @link https://stackoverflow.com/questions/35054868/sending-socket-data-separately-in-node-js -- since this is a TCP stream hence we have to separate out the stuff.
  */
 // write to socket
-// for (let i = 0; i < 5; i++) {
-//   set.data[0].command.key = "key_" + i;
-//   set.data[0].command.value = i + "";
-//   netSocket.write(JSON.stringify(set) + "\n");
-// }
+for (let i = 0; i < 5; i++) {
+  set.data[0].command.key = "key_" + i;
+  set.data[0].command.value = i + "";
+  console.log("set obj: ", set);
+  netSocket.write(JSON.stringify(set) + "\n");
+}
 
-// setTimeout(() => {
-netSocket.write(JSON.stringify(get));
-// }, 500);
+setTimeout(() => {
+  for (let i = 0; i < 5; i++) {
+    get.data[0].command.key = "key_" + i;
+    netSocket.write(JSON.stringify(get) + "\n");
+  }
+}, 1000);
 
 netSocket.on("data", (buffer) => {
   const data = buffer.toString("utf8");
