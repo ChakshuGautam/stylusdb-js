@@ -28,21 +28,25 @@ class Log {
    * @param {string}   Options.[path='./']    Path to save the log db to
    * @return {Log}
    */
-  constructor(node, { adapter = require("leveldown"), path = "" }) {
-    this.node = node;
+  constructor({ adapter = require("leveldown"), path = "" }) {
+    // this.node = node;
     this.committedIndex = 0;
-    // this.db = levelup(encode(adapter(path), { valueEncoding: 'json', keyEncoding: 'binary' }));
+// this.db = levelup(encode(adapter(path), { valueEncoding: 'json', keyEncoding: 'binary' }));
     try {
-      this.db = levelup(
-        encode(adapter(path), { valueEncoding: "json", keyEncoding }),
-        {
-          cacheSize: 100 * 1024 * 1024,
-        }
-      );
+    this.db = levelup(
+      encode(adapter(path), { valueEncoding: "json", keyEncoding }),
+      {
+        cacheSize: 100 * 1024 * 1024,
+      }
+    );
     } catch (err) {
-      console.log("error initialising db adapter for logs in raft: ", err);
+    console.log("error initialising db adapter for logs in raft: ", err);
     }
     this.commandAckQueue = new PromiseQueue(1, Infinity);
+  }
+
+  setNode(node){
+    this.node = node
   }
 
   /**
@@ -62,11 +66,11 @@ class Log {
    */
   async saveCommand(command, term, index) {
     if (!index) {
-      const { index: lastIndex } = await this.getLastInfo();
+            const { index: lastIndex } = await this.getLastInfo();
 
-      index = lastIndex + 1;
+      index = parseInt(lastIndex) + 1;
     }
-
+    
     const entry = {
       term: term,
       index,
@@ -81,7 +85,7 @@ class Log {
     };
 
     await this.put(entry);
-    return entry;
+        return entry;
   }
 
   /**
@@ -92,8 +96,8 @@ class Log {
    * @return {Promise<void>} Resolves once entry is saved
    * @public
    */
-  put(entry) {
-    return this.db.put(entry.index, entry);
+  async put(entry) {
+    return await this.db.put(entry.index, entry);
   }
 
   /**
@@ -106,7 +110,7 @@ class Log {
   getEntriesAfter(index) {
     const entries = [];
     return new Promise((resolve, reject) => {
-      try {
+try {
         this.db
           .createReadStream({ gt: index })
           .on("data", (data) => {
@@ -118,7 +122,7 @@ class Log {
           .on("end", () => {
             resolve(entries);
           });
-      } catch (err) {
+} catch (err) {
         console.error("error getting log entries after index: ", index);
       }
     });
@@ -150,11 +154,11 @@ class Log {
    * @public
    */
   async has(index) {
-    try {
+try {
       const entry = await this.db.get(index);
       //   if (!entry) return false;
       return true;
-    } catch (err) {
+} catch (err) {
       console.log("error fetching key from db: ", err);
       return false;
     }
@@ -168,9 +172,9 @@ class Log {
    * @public
    */
   get(index) {
-    try {
+try {
       return this.db.get(index);
-    } catch (err) {
+} catch (err) {
       console.error("error fetching key from log db: ", err);
     }
   }
@@ -183,8 +187,8 @@ class Log {
    * @return {Promise<Object>} Last entries index, term and committedIndex
    */
   async getLastInfo() {
-    const { index, term } = await this.getLastEntry();
-
+        const { index, term } = await this.getLastEntry();
+    
     return {
       index,
       term,
@@ -204,7 +208,7 @@ class Log {
         index: 0,
         term: this.node.term,
       };
-      try {
+try {
         this.db
           .createReadStream({ reverse: true, limit: 1 })
           .on("data", (data) => {
@@ -218,7 +222,7 @@ class Log {
           .on("end", () => {
             resolve(entry);
           });
-      } catch (err) {
+} catch (err) {
         console.error("error getting last log entry in raft: ", err);
         reject(err);
       }
@@ -265,7 +269,7 @@ class Log {
 
     return new Promise((resolve, reject) => {
       let hasResolved = false;
-      try {
+try {
         this.db
           .createReadStream({
             reverse: true,
@@ -287,7 +291,7 @@ class Log {
               resolve(defaultInfo);
             }
           });
-      } catch (err) {
+} catch (err) {
         console.error("Error getting log entry before ", err);
         reject(err);
       }
@@ -307,9 +311,9 @@ class Log {
   async commandAck(index, address) {
     return this.commandAckQueue.add(async () => {
       let entry;
-      try {
+try {
         entry = await this.get(index);
-      } catch (err) {
+} catch (err) {
         return {
           responses: [],
         };
@@ -341,14 +345,14 @@ class Log {
    * @return {Promise<entry>}
    */
   async commit(index) {
-    try {
+try {
       const entry = await this.db.get(index);
 
       entry.committed = true;
       this.committedIndex = entry.index;
 
       return this.put(entry);
-    } catch (err) {
+} catch (err) {
       console.error("error committing log: ", err);
     }
   }
@@ -364,7 +368,7 @@ class Log {
     return new Promise((resolve, reject) => {
       let hasResolved = false;
       const entries = [];
-      try {
+try {
         this.db
           .createReadStream({
             gt: this.committedIndex,
@@ -381,7 +385,7 @@ class Log {
           .on("end", () => {
             resolve(entries);
           });
-      } catch (err) {
+} catch (err) {
         console.error("error gettingUncommittedEntriesUptoIndex: ", err);
         reject(err);
       }

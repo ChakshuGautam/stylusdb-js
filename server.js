@@ -59,7 +59,7 @@ server.on("connection", (socket) => {
     console.log(pkt);
     console.log("#########################################");
     console.log("#########################################");
-    pkt.forEach(async (item) => {
+    for(const item of pkt) {
       console.log("item in for each: ", item);
       const { task, data } = JSON.parse(item);
       if (raftNode.state === MsgRaft.LEADER) {
@@ -149,7 +149,7 @@ server.on("connection", (socket) => {
             break;
         }
       }
-    });
+    }
   });
 
   // TODO: Figure out a way to connect sockPull to the socket received with server connection

@@ -13,7 +13,7 @@ const givePayloadSkeleton = (op, key, val = null) => {
       {
         command: {
           key: key,
-          val: val,
+          value: val,
         },
       },
     ],
