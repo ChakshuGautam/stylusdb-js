@@ -26,7 +26,7 @@ server.on("connection", (socket) => {
   if (activeConnection) {
     // this limits to one connection at a time
     // TODO: Move to multi connections
-    socket.end("Another connection is already active.");
+    socket.end("error 8");
     return;
   }
   activeConnection = true;

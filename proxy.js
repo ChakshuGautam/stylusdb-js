@@ -60,12 +60,17 @@ class QueryQueue extends EventEmitter {
       return;
     }
     this.isProcessing = true;
-    const { query, callback, queryId } = this.queue.shift();
+    const { query, callback, queryId } = this.queue[0];
 
     this.execute(query)
       .then((result) => {
         console.log("result: ", result);
         console.log("result.toString(): ", result.toString());
+        if(result.toString().trim() === "error 8"){
+          let e = new Error("Error 8 Another connection active trying again");
+          callback(e, queryId);
+        }
+        else this.queue.shift();
         return callback(null, queryId, result);
       })
       .catch((error) => {
