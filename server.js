@@ -84,9 +84,10 @@ server.on("connection", (socket) => {
             try {
               if (data && data.length > 0) {
                 let cmd = data[0].command;
-                cmd["type"] = "GET";
-                await raftNode.command(cmd);
                 let val = raftNode.db.get(cmd.key);
+                if(val == null){
+
+                }
                 socket.write(`Value of key : ${cmd.key} is ${val}`);
               } else {
                 throw new Error("Invalid data format");
@@ -120,14 +121,10 @@ server.on("connection", (socket) => {
             try {
               if (data && data.length > 0) {
                 let cmd = data[0].command;
-                cmd["type"] = "GET";
-                let packet = await raftNode.packet("rpc", cmd);
-                raftNode.message(MsgRaft.LEADER, packet, () => {
-                  console.log(
-                    "Forwarded the set command to leader since I am a follower."
-                  );
-                });
                 let val = raftNode.db.get(cmd.key);
+                if(val == null){
+                  
+                }
                 socket.write(`Value of key : ${cmd.key} is ${val}`);
               } else {
                 throw new Error("Invalid data format");
