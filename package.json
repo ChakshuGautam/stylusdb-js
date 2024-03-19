@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -17,21 +17,26 @@
   },
   "homepage": "https://github.com/ChakshuGautam/stylusdb-js#readme",
   "dependencies": {
-    "argh": "0.1.x",
+    "argh": "^0.1.4",
+    "assume": "^2.3.0",
     "axon": "2.0.x",
     "diagnostics": "1.1.x",
-    "leveldown": "^6.1.1",
-    "levelup": "^5.1.1",
-    "node-lmdb": "^0.10.0",
-    "promise-queue": "^2.2.5",
     "emits": "^3.0.0",
     "encoding-down": "^6.3.0",
     "eventemitter3": "^4.0.7",
     "extendible": "^0.1.1",
     "immediate": "^3.3.0",
+    "jest": "^29.7.0",
+    "leveldown": "^6.1.1",
+    "levelup": "^5.1.1",
+    "memdown": "^6.1.1",
     "millisecond": "^0.1.2",
     "modification": "^1.0.0",
+    "node-lmdb": "^0.10.0",
     "one-time": "^1.0.0",
-    "tick-tock": "^1.0.0"
+    "promise-queue": "^2.2.5",
+    "rimraf": "^5.0.5",
+    "tick-tock": "^1.0.0",
+    "uuid": "^9.0.1"
   }
 }

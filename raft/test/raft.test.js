@@ -1,5 +1,5 @@
 const assume = require('assume');
-const Raft = require('../');
+const Raft = require('..');
 const Log = require('../log');
 
 //
