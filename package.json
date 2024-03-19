@@ -36,6 +36,7 @@
     "one-time": "^1.0.0",
     "promise-queue": "^2.2.5",
     "rimraf": "^5.0.5",
-    "tick-tock": "^1.0.0"
+    "tick-tock": "^1.0.0",
+    "uuid": "^9.0.1"
   }
 }

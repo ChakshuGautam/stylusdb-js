@@ -1,12 +1,10 @@
 /**
  * this file serves as  client to connect to the server raft nodes
  */
-const argv = require("argh").argv;
 const net = require("net");
 
-let port = +argv.port || 8081; // read the port from command line arguments
-var netSocket = net.createConnection({ port: port + 1000 }, () => {
-  console.log("connected to server at port", port + 1000);
+var netSocket = net.createConnection({ port: 6767 }, () => {
+  console.log("connected to server at port", 6767);
 });
 
 const sendEvent = (op, data) => {

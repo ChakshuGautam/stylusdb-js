@@ -59,18 +59,6 @@ async function onData(data) {
   const arr = data?.data;
   if (arr && arr.length > 0)
     console.log("in data.on('data'): ", arr[0].command);
-  // send this data to leader
-  if (raft.state !== MsgRaft.LEADER) {
-    try {
-      // send acknowledgement
-      if (arr && arr.length > 0) {
-        const ackPacket = await raft.packet("append ack", arr[0].command);
-        raft.message(MsgRaft.LEADER, ackPacket);
-      }
-    } catch (err) {
-      console.error("error while forwarding response to leader: ", err);
-    }
-  }
 }
 
 function onCommit(command) {
@@ -90,17 +78,23 @@ function onCommit(command) {
 // TODO: Turn this into a Promise returning thing
 const registerNode = function (port, config = {}) {
   // return new Promise((resolve, reject) => {
-  raft = new MsgRaft("tcp://0.0.0.0:" + port, {
-    "election min": config.min,
-    "election max": config.max,
-    heartbeat: config.heartbeat,
-    adapter: require("leveldown"),
-    path: `./log/${port}/`,
-    Log: new Log(this, {
+  try {
+    let log = new Log({
       adapter: require("leveldown"),
       path: `./log/${port}/`,
-    }),
-  });
+    })
+    raft = new MsgRaft("tcp://0.0.0.0:" + port, {
+      "election min": config.min,
+      "election max": config.max,
+      heartbeat: config.heartbeat,
+      adapter: require("leveldown"),
+      path: `./log/${port}/`,
+      Log: log,
+    });
+    log.setNode(raft)
+  } catch (err) {
+    console.log("error creating msgraft node: ", err);
+  }
 
   // registering callbacks on the instance
   raft

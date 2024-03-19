@@ -26,7 +26,7 @@ server.on("connection", (socket) => {
   if (activeConnection) {
     // this limits to one connection at a time
     // TODO: Move to multi connections
-    socket.end("Another connection is already active.");
+    socket.end("error 8");
     return;
   }
   activeConnection = true;
@@ -34,6 +34,9 @@ server.on("connection", (socket) => {
   socket.write("Connected\n");
 
   socket.on("data", async (pkt) => {
+    if (pkt === undefined) {
+      socket.write("undefined packet received");
+    }
     console.log("***************************************");
     console.log("***************************************");
     console.log("RECEIVED PACKET IS: ");
@@ -56,9 +59,9 @@ server.on("connection", (socket) => {
     console.log(pkt);
     console.log("#########################################");
     console.log("#########################################");
-    pkt.forEach(async (item) => {
+    for(const item of pkt) {
       console.log("item in for each: ", item);
-      const { task, data } = item;
+      const { task, data } = JSON.parse(item);
       if (raftNode.state === MsgRaft.LEADER) {
         switch (task) {
           case "SET":
@@ -81,9 +84,10 @@ server.on("connection", (socket) => {
             try {
               if (data && data.length > 0) {
                 let cmd = data[0].command;
-                cmd["type"] = "GET";
-                await raftNode.command(cmd);
                 let val = raftNode.db.get(cmd.key);
+                if(val == null){
+
+                }
                 socket.write(`Value of key : ${cmd.key} is ${val}`);
               } else {
                 throw new Error("Invalid data format");
@@ -117,14 +121,10 @@ server.on("connection", (socket) => {
             try {
               if (data && data.length > 0) {
                 let cmd = data[0].command;
-                cmd["type"] = "GET";
-                let packet = await raftNode.packet("rpc", cmd);
-                raftNode.message(MsgRaft.LEADER, packet, () => {
-                  console.log(
-                    "Forwarded the set command to leader since I am a follower."
-                  );
-                });
                 let val = raftNode.db.get(cmd.key);
+                if(val == null){
+                  
+                }
                 socket.write(`Value of key : ${cmd.key} is ${val}`);
               } else {
                 throw new Error("Invalid data format");
@@ -138,12 +138,15 @@ server.on("connection", (socket) => {
             raftNode.db.closeDb();
             break;
           default:
+            if (task === undefined) {
+              console.warn("one of the packets was with undefined task");
+              socket.write("one of the packets was with undefined task");
+            }
             console.log("in default and task: ", task);
-            reply("error 90");
             break;
         }
       }
-    });
+    }
   });
 
   // TODO: Figure out a way to connect sockPull to the socket received with server connection
