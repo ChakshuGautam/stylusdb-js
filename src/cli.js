@@ -3,7 +3,7 @@
  *   with custom commands, autocomplete for custom commands, persistent command history &
  *   "command history compression" (won't keep multiple instances in a row of the same command in the history)
  *
- * Author: l3l_aze <at> Yahoo!! (dot) com
+ * Author: yash <at> techsavvyash (dot) dev (yash@techsavvyash.dev)
  */
 
 'use strict';
@@ -11,9 +11,9 @@
 const fs = require('fs');
 const path = require('path');
 const repl = require('repl');
+const name = 'stylusdb-cli';
 const debug = require('debug')(name);
 
-const name = 'stylusdb-cli';
 
 // Custom command setup
 const fullCommands = {
@@ -28,7 +28,7 @@ const commands = Object.keys(fullCommands);
 
 // Create REPL
 const server = repl.start({
-    prompt: 'test-repl>',
+    prompt: 'stylus-db>',
     terminal: true, // Set to true to enable command history
     ignoreUndefined: true, // Ignore 'undefined' when running a command that does not return a value
     replMode: 'strict' // 'use strict'
@@ -68,13 +68,14 @@ function init() {
 const customEval = function customEval(cmd, callback) {
     let result;
     cmd = cmd.trim();
-
+    let words = cmd.split(" ");
+    let command = words[0];
     // Calling eval with an empty line below in the default case will cause it to be saved in command history.
     if (cmd === '') {
         return undefined;
     }
 
-    switch (cmd) {
+    switch (command) {
         case 'clear':
             process.stdout.cursorTo(0, 0); // Move to top line of terminal
             process.stdout.clearLine();

@@ -1,0 +1,9 @@
+procs:
+  raft-node-1:
+    shell: "node ./src/server.js --port 8081"
+  raft-node-2:
+    shell: "node ./src/server.js --port 8082"
+  raft-node-3:
+    shell: "node ./src/server.js --port 8083"
+  raft-node-4:
+    shell: "node ./src/server.js --port 8084"
