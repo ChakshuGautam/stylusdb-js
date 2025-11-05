@@ -1,0 +1,21 @@
+{
+  "logging": {
+    "level": "debug"
+  },
+  "server": {
+    "port": 8081,
+    "clusterPorts": [8081, 8082]
+  },
+  "raft": {
+    "electionMin": 2000,
+    "electionMax": 5000,
+    "heartbeat": 1000
+  },
+  "database": {
+    "path": "./db",
+    "batchSize": 100
+  },
+  "monitoring": {
+    "enabled": false
+  }
+}

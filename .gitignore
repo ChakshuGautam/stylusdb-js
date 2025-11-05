@@ -3,3 +3,6 @@ db
 log
 logs
 *.log
+.env
+.env.local
+.env.*.local

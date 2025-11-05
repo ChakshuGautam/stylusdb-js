@@ -1,0 +1,21 @@
+{
+  "logging": {
+    "level": "error"
+  },
+  "server": {
+    "port": 9081,
+    "clusterPorts": [9081, 9082]
+  },
+  "raft": {
+    "electionMin": 1000,
+    "electionMax": 2000,
+    "heartbeat": 500
+  },
+  "database": {
+    "path": "./test-db",
+    "batchSize": 10
+  },
+  "monitoring": {
+    "enabled": false
+  }
+}

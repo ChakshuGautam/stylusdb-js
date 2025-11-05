@@ -1,0 +1,26 @@
+{
+  "logging": {
+    "level": "warn"
+  },
+  "server": {
+    "port": 8080,
+    "clusterPorts": [8081, 8082, 8083, 8084]
+  },
+  "raft": {
+    "electionMin": 5000,
+    "electionMax": 10000,
+    "heartbeat": 2000
+  },
+  "database": {
+    "path": "/var/lib/stylusdb/db",
+    "batchSize": 1000
+  },
+  "network": {
+    "timeout": 10000,
+    "socketTimeout": 30000
+  },
+  "monitoring": {
+    "enabled": true,
+    "port": 9090
+  }
+}
