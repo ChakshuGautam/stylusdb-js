@@ -1,0 +1,90 @@
+version: '3.8'
+
+services:
+  node1:
+    build: .
+    container_name: stylusdb-node1
+    environment:
+      - NODE_ENV=production
+      - PORT=8081
+      - LOG_LEVEL=info
+    ports:
+      - "8081:8081"
+      - "8181:8181"
+    volumes:
+      - node1-data:/app/db
+      - node1-logs:/app/logs
+    networks:
+      - stylusdb-network
+    restart: unless-stopped
+
+  node2:
+    build: .
+    container_name: stylusdb-node2
+    environment:
+      - NODE_ENV=production
+      - PORT=8082
+      - LOG_LEVEL=info
+    ports:
+      - "8082:8082"
+      - "8182:8182"
+    volumes:
+      - node2-data:/app/db
+      - node2-logs:/app/logs
+    networks:
+      - stylusdb-network
+    restart: unless-stopped
+    depends_on:
+      - node1
+
+  node3:
+    build: .
+    container_name: stylusdb-node3
+    environment:
+      - NODE_ENV=production
+      - PORT=8083
+      - LOG_LEVEL=info
+    ports:
+      - "8083:8083"
+      - "8183:8183"
+    volumes:
+      - node3-data:/app/db
+      - node3-logs:/app/logs
+    networks:
+      - stylusdb-network
+    restart: unless-stopped
+    depends_on:
+      - node1
+
+  node4:
+    build: .
+    container_name: stylusdb-node4
+    environment:
+      - NODE_ENV=production
+      - PORT=8084
+      - LOG_LEVEL=info
+    ports:
+      - "8084:8084"
+      - "8184:8184"
+    volumes:
+      - node4-data:/app/db
+      - node4-logs:/app/logs
+    networks:
+      - stylusdb-network
+    restart: unless-stopped
+    depends_on:
+      - node1
+
+volumes:
+  node1-data:
+  node1-logs:
+  node2-data:
+  node2-logs:
+  node3-data:
+  node3-logs:
+  node4-data:
+  node4-logs:
+
+networks:
+  stylusdb-network:
+    driver: bridge
