@@ -12,7 +12,10 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "audit": "npm audit",
+    "audit:fix": "npm audit fix",
+    "outdated": "npm outdated"
   },
   "repository": {
     "type": "git",
@@ -31,14 +34,14 @@
   "dependencies": {
     "argh": "0.1.x",
     "axon": "2.0.x",
-    "diagnostics": "1.1.x",
+    "diagnostics": "^2.0.2",
     "leveldown": "^6.1.1",
     "levelup": "^5.1.1",
-    "node-lmdb": "^0.10.0",
+    "node-lmdb": "^0.10.1",
     "promise-queue": "^2.2.5",
     "emits": "^3.0.0",
-    "encoding-down": "^6.3.0",
-    "eventemitter3": "^4.0.7",
+    "encoding-down": "^7.1.0",
+    "eventemitter3": "^5.0.1",
     "extendible": "^0.1.1",
     "immediate": "^3.3.0",
     "millisecond": "^0.1.2",
