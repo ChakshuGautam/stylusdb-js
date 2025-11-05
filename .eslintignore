@@ -1,0 +1,5 @@
+node_modules/
+coverage/
+db/
+log/
+*.min.js

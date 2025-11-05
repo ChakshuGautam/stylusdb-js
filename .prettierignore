@@ -1,0 +1,8 @@
+node_modules
+coverage
+db
+log
+*.min.js
+package-lock.json
+.git
+.github

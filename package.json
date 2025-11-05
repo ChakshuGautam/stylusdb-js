@@ -7,7 +7,12 @@
     "test": "mocha 'raft/test/**/*.js' --timeout 10000 --exit",
     "test:watch": "mocha 'raft/test/**/*.js' --watch --timeout 10000",
     "test:coverage": "nyc npm test",
-    "start": "node index.js"
+    "start": "node index.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "husky install"
   },
   "repository": {
     "type": "git",
@@ -45,6 +50,16 @@
     "mocha": "^10.2.0",
     "chai": "^4.3.10",
     "assume": "^2.3.0",
-    "nyc": "^15.1.0"
+    "nyc": "^15.1.0",
+    "eslint": "^8.50.0",
+    "prettier": "^3.0.3",
+    "husky": "^8.0.3",
+    "lint-staged": "^14.0.1"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "prettier --write"
+    ]
   }
 }

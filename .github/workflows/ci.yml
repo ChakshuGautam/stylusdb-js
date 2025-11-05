@@ -26,9 +26,11 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
+    - name: Check code formatting
+      run: npm run format:check
+
     - name: Run linter
-      run: npm run lint --if-present
-      continue-on-error: true
+      run: npm run lint
 
     - name: Run tests
       run: npm test
