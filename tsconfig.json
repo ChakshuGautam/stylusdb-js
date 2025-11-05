@@ -1,0 +1,47 @@
+{
+  "compilerOptions": {
+    // Type Checking
+    "allowJs": true,
+    "checkJs": false,
+    "noEmit": true,
+
+    // Modules
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+
+    // Emit
+    "declaration": true,
+    "declarationMap": true,
+    "outDir": "./types",
+
+    // JavaScript Support
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+
+    // Language and Environment
+    "target": "ES2021",
+    "lib": ["ES2021"],
+
+    // Type Checking
+    "strict": false,
+    "skipLibCheck": true,
+
+    // Completeness
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": [
+    "**/*.js",
+    "**/*.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "coverage",
+    "dist",
+    "db",
+    "log",
+    "logs",
+    "test",
+    "tests"
+  ]
+}

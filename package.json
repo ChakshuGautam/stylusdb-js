@@ -15,7 +15,8 @@
     "prepare": "husky install",
     "audit": "npm audit",
     "audit:fix": "npm audit fix",
-    "outdated": "npm outdated"
+    "outdated": "npm outdated",
+    "typecheck": "tsc --noEmit"
   },
   "repository": {
     "type": "git",
@@ -64,7 +65,9 @@
     "eslint": "^8.50.0",
     "prettier": "^3.0.3",
     "husky": "^8.0.3",
-    "lint-staged": "^14.0.1"
+    "lint-staged": "^14.0.1",
+    "typescript": "^5.3.3",
+    "@types/node": "^16.18.68"
   },
   "lint-staged": {
     "*.js": [
