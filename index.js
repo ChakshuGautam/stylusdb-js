@@ -187,30 +187,67 @@ sockPull.on('message', async (task, data, reply) => {
     }
 })
 
-// send a message to the raft every 5 seconds
-setInterval(async () => {
+// DEVELOPMENT/TEST: Uncomment to test automatic writes
+// WARNING: This will continuously write to the database!
+// setInterval(async () => {
+//     if (raft.state === MsgRaft.LEADER) {
+//         for (var i = 0; i < 5000; i++) {
+//             const data = {
+//                 'key': i.toString(), 'value': i.toString()
+//             };
+//             await raft.command(data);
+//         }
+//     }
+// }, 5000);
 
-    if (raft.state === MsgRaft.LEADER) {
+// Graceful shutdown handling
+const gracefulShutdown = async () => {
+    console.log('\nReceived shutdown signal, cleaning up...');
 
-        for (var i = 0; i < 5000; i++) {
-            const data = {
-                'key': i.toString(), 'value': i.toString()
-            };
-            await raft.command(data);
+    try {
+        // Flush any pending database writes
+        if (raft.db && typeof raft.db.flush === 'function') {
+            raft.db.flush();
         }
-        // sockPush.send('SET', {
-        //     'key': i.toString(), 'value': i.toString()
-        // }, function (res) {
-        //     console.log(`ack for SET: ${res}`);
-        // });
-    }
 
-    // for (var i = 0; i < 10; i++) {
-    //     sockPush.send('GET', { 'key': i.toString() }, function (res) {
-    //         console.log(`Response for GET: ${res}`);
-    //     });
-    // }
-    // raft.message(MsgRaft.LEADER, { foo: 'bar' }, () => {
-    //     console.log('message sent');
-    // });
-}, 5000);
+        // Close database connections
+        if (raft.db && typeof raft.db.closeDb === 'function') {
+            raft.db.closeDb();
+        }
+
+        // Close sockets
+        if (sockPull) {
+            sockPull.close();
+        }
+        if (sockPush) {
+            sockPush.close();
+        }
+
+        // End raft instance
+        if (raft && typeof raft.end === 'function') {
+            raft.end();
+        }
+
+        console.log('Cleanup complete, exiting...');
+        process.exit(0);
+    } catch (error) {
+        console.error('Error during shutdown:', error);
+        process.exit(1);
+    }
+};
+
+// Handle various shutdown signals
+process.on('SIGTERM', gracefulShutdown);
+process.on('SIGINT', gracefulShutdown);
+process.on('SIGHUP', gracefulShutdown);
+
+// Handle uncaught errors
+process.on('uncaughtException', (error) => {
+    console.error('Uncaught exception:', error);
+    gracefulShutdown();
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled rejection at:', promise, 'reason:', reason);
+    gracefulShutdown();
+});

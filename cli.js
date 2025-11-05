@@ -74,7 +74,11 @@ const customEval = function customEval(cmd, callback) {
         return undefined;
     }
 
-    switch (cmd) {
+    // Split command into words for parsing
+    const words = cmd.split(/\s+/);
+    const command = words[0].toLowerCase();
+
+    switch (command) {
         case 'clear':
             process.stdout.cursorTo(0, 0); // Move to top line of terminal
             process.stdout.clearLine();
@@ -87,12 +91,14 @@ const customEval = function customEval(cmd, callback) {
             // TODO: Implement a graceful shutdown
             server.lines.push(cmd); // Save command in history when successful
             server.emit('exit'); // Rather than process.exit, because that will just quit the program immediately.
+            break;
 
         case 'set':
             if (words.length !== 3) {
                 console.error('Usage: set <key> <value>');
             } else {
                 setKeyValue(words[1], words[2]);
+                server.lines.push(cmd); // Save command in history when successful
             }
             break;
 
@@ -101,6 +107,7 @@ const customEval = function customEval(cmd, callback) {
                 console.error('Usage: get <key>');
             } else {
                 getKeyValue(words[1]);
+                server.lines.push(cmd); // Save command in history when successful
             }
             break;
 

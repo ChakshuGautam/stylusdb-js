@@ -15,8 +15,8 @@ const sendGET = (key, fn) => {
 }
 
 const sendSET = (key, value, fn) => {
-    sock.send('SET', { [key]: value }, function (res) {
-        fn('ack');
+    sock.send('SET', { key: key, value: value }, function (res) {
+        fn(res);
     });
 }
 

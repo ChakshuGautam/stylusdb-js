@@ -9,6 +9,8 @@ class LMDBManager {
             maxDbs: maxDbs || 10
         });
         this.writeTxn = null;
+        this.writeCount = 0;
+        this.batchSize = 100; // Commit every 100 writes
     }
 
     openDb(dbName) {
@@ -19,36 +21,101 @@ class LMDBManager {
     }
 
     closeDb() {
-        this.writeTxn.commit();
-        this.dbi.close();
+        // Commit any pending transaction
+        if (this.writeTxn) {
+            try {
+                this.writeTxn.commit();
+                this.writeTxn = null;
+            } catch (e) {
+                console.error("Error committing transaction on close:", e);
+            }
+        }
+        if (this.dbi) {
+            this.dbi.close();
+        }
     }
 
     closeEnv() {
+        this.closeDb();
         this.env.close();
+    }
+
+    /**
+     * Commits the current write transaction and resets the counter
+     * @private
+     */
+    _commitTransaction() {
+        if (this.writeTxn) {
+            try {
+                this.writeTxn.commit();
+                this.writeTxn = null;
+                this.writeCount = 0;
+            } catch (e) {
+                console.error("Error committing transaction:", e);
+                // Try to abort the transaction on error
+                try {
+                    this.writeTxn.abort();
+                } catch (abortError) {
+                    console.error("Error aborting transaction:", abortError);
+                }
+                this.writeTxn = null;
+                this.writeCount = 0;
+                throw e;
+            }
+        }
     }
 
     set(key, value) {
         try {
             if (!this.writeTxn) {
-                const txn = this.env.beginTxn();
-                this.writeTxn = txn;
+                this.writeTxn = this.env.beginTxn();
+                this.writeCount = 0;
             }
+
             this.writeTxn.putString(this.dbi, key, value);
+            this.writeCount++;
+
+            // Periodically commit to avoid memory buildup and ensure data persistence
+            if (this.writeCount >= this.batchSize) {
+                this._commitTransaction();
+            }
+
             console.log('wrote', key, value);
         } catch (e) {
-            console.error("Not a valid key", key, value);
+            console.error("Error writing key-value pair:", key, value, e);
+            // Abort the transaction on error
+            if (this.writeTxn) {
+                try {
+                    this.writeTxn.abort();
+                } catch (abortError) {
+                    console.error("Error aborting transaction:", abortError);
+                }
+                this.writeTxn = null;
+                this.writeCount = 0;
+            }
+            throw e;
         }
-
     }
 
     get(key) {
-        // const txn = this.env.beginTxn({ readOnly: true });
-        if (!this.writeTxn) {
-            const txn = this.env.beginTxn();
-            this.writeTxn = txn;
+        try {
+            // Use read-only transaction for reads
+            const txn = this.env.beginTxn({ readOnly: true });
+            const value = txn.getString(this.dbi, key);
+            txn.abort(); // Always abort read-only transactions
+            return value;
+        } catch (e) {
+            console.error("Error reading key:", key, e);
+            return null;
         }
-        const value = this.writeTxn.getString(this.dbi, key);
-        return value;
+    }
+
+    /**
+     * Force commit any pending writes
+     * Should be called periodically or before important operations
+     */
+    flush() {
+        this._commitTransaction();
     }
 }
 
