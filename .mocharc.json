@@ -1,0 +1,8 @@
+{
+  "require": [],
+  "timeout": 10000,
+  "exit": true,
+  "spec": "raft/test/**/*.js",
+  "color": true,
+  "reporter": "spec"
+}

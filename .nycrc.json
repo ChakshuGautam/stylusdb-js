@@ -1,0 +1,24 @@
+{
+  "all": true,
+  "include": [
+    "**/*.js"
+  ],
+  "exclude": [
+    "coverage/**",
+    "test/**",
+    "raft/test/**",
+    "node_modules/**",
+    "db/**",
+    "log/**"
+  ],
+  "reporter": [
+    "text",
+    "html",
+    "lcov"
+  ],
+  "check-coverage": false,
+  "lines": 80,
+  "statements": 80,
+  "functions": 80,
+  "branches": 80
+}
